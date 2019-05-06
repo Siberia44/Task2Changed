@@ -1,5 +1,6 @@
 import org.junit.Before;
 import org.junit.Test;
+import part1.Beer;
 import part2.ModifiableContainer;
 import part2.exception.UnmodifiablePartException;
 
@@ -10,158 +11,156 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-public class MixedListsTest {
-    private List<Object> tmp = new ArrayList<>();
-    private ModifiableContainer<Object> mixedLists = new ModifiableContainer<>(tmp, new ArrayList<>());
+public class MixedListsTest { 
+    private ModifiableContainer<Beer> mixed;
+    private Beer product;
+    private Beer product1;
+    private Beer product2;
+    private Beer product3;
+    List<Beer> unmodif;
+    List<Beer> modif;
+    List<Beer> collection;
 
-    @Test
-    public void checkAddMethod() {
-        assertTrue(mixedLists.add("hello"));
-        assertTrue(mixedLists.add("hello2"));
-        assertTrue(mixedLists.add("hello3"));
-        assertFalse(mixedLists.isEmpty());
-        assertEquals(12, mixedLists.size());
+
+    @Before
+    public void initialize() {
+        product = new Beer();
+        product1 = new Beer();
+        product2 = new Beer();
+        product3 = new Beer();
+        product.setName("beer");
+        product1.setName("beer1");
+        product2.setName("beer2");
+        product3.setName("beer3");
+        unmodif = new ArrayList<>();
+        unmodif.add(product);
+        unmodif.add(product1);
+        modif = new ArrayList<>();
+        modif.add(product2);
+        modif.add(product3);
+        collection = new ArrayList<>();
+        collection.add(product);
+        collection.add(product3);
+        mixed = new ModifiableContainer<>(unmodif, modif);
     }
 
     @Test
-    public void checkAddByIndexMethod() {
-        mixedLists.add(3, "add by index");
-        assertEquals("add by index", mixedLists.get(3));
-        assertFalse(mixedLists.isEmpty());
-        assertEquals(10, mixedLists.size());
+    public void shouldReturnSize() {
+        assertEquals(4, mixed.size());
     }
 
     @Test
-    public void checkIndexOffMethod() {
-        assertEquals(-1, mixedLists.indexOf("skfdns"));
-        assertEquals(-1, mixedLists.indexOf("sk"));
-        assertEquals(6, mixedLists.indexOf("hello4"));
+    public void shouldReturnFalseIfCollectionNotIsEmpty() {
+        assertFalse(mixed.isEmpty());
     }
 
     @Test
-    public void checkLastIndexOffMethod() {
-        assertEquals(8, mixedLists.lastIndexOf("hello"));
+    public void shouldReturnTrueIfCollectionContainsObject() {
+        assertTrue(mixed.contains(product));
     }
 
     @Test
-    public void checkRemoveByIndexMethod() {
-        assertEquals("hello2", mixedLists.remove(4));
+    public void shouldRemoveObjectFromCollection() {
+        mixed.remove(product2);
+        assertEquals(3, mixed.size());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldThrowExceptionIfYouTryRemoveObjectFromUnmodCollection() {
+        mixed.remove(product3);
     }
 
     @Test
-    public void checkRemoveObjectMethod() {
-        assertTrue(mixedLists.remove("hello"));
+    public void shouldAddObjectAtTheEndOfTheList() {
+        mixed.add(product3);
+        assertTrue(mixed.contains(product3));
     }
 
     @Test
-    public void checkRemoveAllMethod() {
-        List<Object> arrayList = new ArrayList<>();
-        arrayList.add("hello");
-        arrayList.add("hello2");
-        arrayList.add("hello3");
-        assertTrue(mixedLists.removeAll(arrayList));
-        assertEquals(-1, mixedLists.indexOf("hello3"));
+    public void shouldAddObjectByIndex() {
+        mixed.add(2, product3);
+        assertTrue(mixed.contains(product3));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void throwExceptionIfYouTryAddObjectInUnmodCollection() {
+        mixed.add(3, product3);
+    }
+
+    @Test
+    public void shouldIterator() {
+        Iterator iter = mixed.iterator();
+        assertTrue(iter.hasNext());
+        assertEquals(product, iter.next());
+        assertTrue(iter.hasNext());
+        assertEquals(product1, iter.next());
+    }
+
+    @Test
+    public void shouldRemoveByIndex() {
+        mixed.remove(2);
+        assertEquals(3, mixed.size());
+    }
+
+    @Test
+    public void shouldGetObjectByIndex() {
+        assertEquals(product1, mixed.get(1));
+    }
+
+    @Test
+    public void shouldRemoveByObject() {
+        mixed.remove(product2);
+        assertEquals(3, mixed.size());
     }
 
     @Test(expected = UnmodifiablePartException.class)
-    public void checkRemoveObjectMethod2() {
-        assertTrue(mixedLists.remove("test"));
+    public void shouldThrowExceptionIfYouTryRemoveByObjectFromUnmodCollection() {
+        mixed.remove(product);
     }
 
     @Test
-    public void checkRetainAllMethod() {
-        List<Object> arrayList = new ArrayList<>();
-        arrayList.add("hello");
-        arrayList.add("hello2");
-        arrayList.add("hello3");
-        assertTrue(mixedLists.retainAll(arrayList));
-        assertEquals(-1, mixedLists.indexOf("hello4"));
+    public void shouldSetTheObjectByIndex() {
+        mixed.set(2, product3);
+        assertTrue(mixed.contains(product3));
+        assertEquals(2, mixed.indexOf(product3));
     }
 
     @Test
-    public void checkSetMethod() {
-        assertEquals("hello2", mixedLists.set(4, "set Test"));
-        assertEquals("set Test", mixedLists.get(4));
-    }
-
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void checkSetMethod2() {
-        assertEquals("hello2", mixedLists.set(50, "set Test"));
+    public void shouldReturnIndexObject() {
+        assertEquals(2, mixed.indexOf(product2));
+        assertEquals(0, mixed.indexOf(product));
     }
 
     @Test
-    public void checkClearMethod() {
-        mixedLists.clear();
-        assertEquals(tmp.size(), mixedLists.size());
+    public void shouldReturnLastIndexObject() {
+        assertEquals(2, mixed.lastIndexOf(product2));
+        assertEquals(0, mixed.lastIndexOf(product));
     }
 
     @Test
-    public void checkContainsMethod() {
-        assertTrue(mixedLists.contains("test3"));
-        assertTrue(mixedLists.contains("hello"));
-        assertTrue(mixedLists.contains("hello2"));
-        assertFalse(mixedLists.contains("hello22"));
+    public void shouldReturnNegativeNumberIfObjectNotContainsInCollection() {
+        Beer productNotExist = new Beer();
+        productNotExist.setName("beer56");
+        assertEquals(-1, mixed.indexOf(productNotExist));
     }
 
     @Test
-    public void checkContainsAllMethod() {
-        List<Object> arrayList = new ArrayList<>();
-        arrayList.add("hello");
-        arrayList.add("hello2");
-        arrayList.add("hello3");
-        arrayList.add("hello4");
-        arrayList.add("hello5");
-        arrayList.add("hello");
-        assertTrue(mixedLists.containsAll(arrayList));
-        assertTrue(mixedLists.containsAll(tmp));
+    public void shouldAddCollectionAtTheEndOfTheList() {
+        mixed.addAll(collection);
+        assertEquals(6, mixed.size());
     }
 
     @Test
-    public void checkToArrayMethod() {
-        assertArrayEquals(new Object[]{"test", "test2", "test3", "hello", "hello2",
-                "hello3", "hello4", "hello5", "hello"}, mixedLists.toArray());
+    public void shouldRemoveAllWhatHaveIncomingCollectionFromCollection() {
+        collection.remove(product);
+        mixed.removeAll(collection);
+        assertEquals(3, mixed.size());
     }
 
-    @Test
-    public void checkAddAllMethod() {
-        List<Object> arrayList = new ArrayList<>();
-        arrayList.add("hello");
-        arrayList.add("hello2");
-        arrayList.add("hello3");
-        assertTrue(mixedLists.addAll(arrayList));
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldNotRemoveAllWhatHaveIncomingCollectionFromCollection() {
+        collection.remove(product);
+        mixed.removeAll(collection);
     }
-
-    @Test
-    public void checkAddAllByIndexMethod() {
-        List<Object> arrayList = new ArrayList<>();
-        arrayList.add("hello");
-        arrayList.add("hello2");
-        arrayList.add("hello3");
-        assertTrue(mixedLists.addAll(5, arrayList));
-        assertEquals("hello3", mixedLists.get(8));
-    }
-
-    @Test
-    public void checkIterator() {
-        Iterator iterator = mixedLists.iterator();
-        assertTrue(iterator.hasNext());
-        assertEquals("test", iterator.next());
-        assertEquals("test2", iterator.next());
-        assertEquals("test3", iterator.next());
-        assertEquals("hello", iterator.next());
-
-    }
-
-    @Before
-    public void add() {
-        tmp.add("test");
-        tmp.add("test2");
-        tmp.add("test3");
-        mixedLists.add("hello");
-        mixedLists.add("hello2");
-        mixedLists.add("hello3");
-        mixedLists.add("hello4");
-        mixedLists.add("hello5");
-        mixedLists.add("hello");
-    }
+   
 }

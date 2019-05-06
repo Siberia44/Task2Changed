@@ -147,10 +147,9 @@ public class ModifiableContainer<A> implements List<A> {
     @Override
     public A remove(int index) {
         if (index >= unmodifiableList.size()) {
-            modifiableList.remove(index - unmodifiableList.size());
-        }
-        throw new UnsupportedOperationException("Can't change unmodifiable part." +
-                "Unmodifiable size: " + unmodifiableList.size() + ", index: " + index);
+            return modifiableList.remove(index - unmodifiableList.size());
+        } throw new UnsupportedOperationException("Can't change unmodifiable part." +
+                    "Unmodifiable size: " + unmodifiableList.size() + ", index: " + index);
     }
 
     @Override
